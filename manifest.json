@@ -1,0 +1,16 @@
+{
+  "name": "Private Age Verification",
+  "short_name": "AgeVerify",
+  "description": "Secure, private, and encrypted age verification system",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#f8fafc",
+  "theme_color": "#2563eb",
+  "icons": [
+    {
+      "src": "/favicon.ico",
+      "sizes": "32x32",
+      "type": "image/x-icon"
+    }
+  ]
+}

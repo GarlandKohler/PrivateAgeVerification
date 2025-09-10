@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Private Age Verification - Secure Age Verification System</title>
+    <meta name="description" content="Secure, private, and encrypted age verification system built on blockchain using Zama FHE technology. Verify age without revealing personal information.">
+    <meta name="keywords" content="age verification, privacy, blockchain, FHE, encryption, Zama">
+    <meta name="author" content="Private Age Verification">
+    <meta property="og:title" content="Private Age Verification">
+    <meta property="og:description" content="Secure, private, and encrypted age verification system">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-domain.vercel.app">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Private Age Verification">
+    <meta name="twitter:description" content="Secure, private, and encrypted age verification system">
+    <link rel="canonical" href="https://your-domain.vercel.app">
+    <link rel="icon" type="image/x-icon" href="./favicon.ico">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Ethers.js with fallback CDNs -->
+    <script>
+        // Ethers.js CDN fallback system
+        const ethersCDNs = [
+            'https://cdn.jsdelivr.net/npm/ethers@6.8.0/dist/ethers.umd.min.js',
+            'https://unpkg.com/ethers@6.8.0/dist/ethers.umd.min.js',
+            'https://cdnjs.cloudflare.com/ajax/libs/ethers/6.8.0/ethers.umd.min.js'
+        ];
+
+        let ethersLoaded = false;
+        let currentCDN = 0;
+
+        function loadEthers() {
+            if (currentCDN >= ethersCDNs.length) {
+                console.error('All ethers.js CDN sources failed');
+                document.addEventListener('DOMContentLoaded', function() {
+                    const toast = document.createElement('div');
+                    toast.className = 'toast error';
+                    toast.innerHTML = 'Failed to load ethers.js library. Please refresh the page or check your internet connection.';
+                    toast.style.cssText = 'position:fixed;top:20px;right:20px;background:#fee;border:1px solid #f00;padding:10px;border-radius:5px;z-index:1000;color:#c00;';
+                    document.body.appendChild(toast);
+                });
+                return;
+            }
+
+            const script = document.createElement('script');
+            script.src = ethersCDNs[currentCDN];
+            script.onload = function() {
+                ethersLoaded = true;
+                console.log('Ethers.js loaded from:', ethersCDNs[currentCDN]);
+            };
+            script.onerror = function() {
+                console.warn('Failed to load ethers.js from:', ethersCDNs[currentCDN]);
+                currentCDN++;
+                loadEthers();
+            };
+            document.head.appendChild(script);
+        }
+
+        loadEthers();
+    </script>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <div class="header-content">
+                <h1 class="title">🔐 Private Age Verification</h1>
+                <p class="subtitle">Secure, Private, and Encrypted Age Verification on Blockchain</p>
+            </div>
+        </header>
+
+        <main class="main-content">
+            <!-- Connection Status -->
+            <div class="connection-status" id="connectionStatus">
+                <div class="connection-info">
+                    <div class="status-indicator" id="statusIndicator"></div>
+                    <span id="statusText">Not Connected</span>
+                </div>
+                <button class="connect-btn" id="connectBtn">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+                    </svg>
+                    Connect Wallet
+                </button>
+            </div>
+
+            <!-- Network Info -->
+            <div class="network-info" id="networkInfo" style="display: none;">
+                <div class="network-grid">
+                    <div class="info-item">
+                        <span class="label">🌐 Network:</span>
+                        <span class="value" id="networkName">-</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">📄 Contract:</span>
+                        <span class="address" id="contractAddress">0x9A963da94E929E49c2a102fab47418Dc3b82Ee6C</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="label">👤 Account:</span>
+                        <span class="address" id="userAddress">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Age Submission Section -->
+            <section class="card">
+                <h2 class="card-title">Submit Your Age</h2>
+                <p class="card-description">
+                    Your age will be encrypted and stored securely on the blockchain.
+                    Only the verification result will be available to authorized parties.
+                </p>
+
+                <div class="form-group">
+                    <label for="ageInput">Enter Your Age:</label>
+                    <input type="number" id="ageInput" min="1" max="120" placeholder="e.g., 25">
+                    <small class="helper-text">Age must be between 1 and 120 years</small>
+                </div>
+
+                <button class="btn btn-primary" id="submitAgeBtn" disabled>
+                    <span class="btn-text">Submit Encrypted Age</span>
+                    <div class="loading-spinner" style="display: none;"></div>
+                </button>
+
+                <div class="status-message" id="ageSubmissionStatus"></div>
+            </section>
+
+            <!-- Verification Section -->
+            <section class="card">
+                <h2 class="card-title">Age Verification</h2>
+                <p class="card-description">
+                    Check your adult verification status or get encrypted verification results.
+                </p>
+
+                <div class="verification-actions">
+                    <button class="btn btn-secondary" id="getVerificationBtn" disabled>
+                        Get Encrypted Result
+                    </button>
+
+                    <button class="btn btn-secondary" id="checkAdultStatusBtn" disabled>
+                        Check Adult Status
+                    </button>
+                </div>
+
+                <div class="verification-result" id="verificationResult"></div>
+            </section>
+
+            <!-- Advanced Features -->
+            <section class="card">
+                <h2 class="card-title">Advanced Verification</h2>
+
+                <div class="advanced-features">
+                    <div class="feature-group">
+                        <h3>Age Range Verification</h3>
+                        <div class="range-inputs">
+                            <input type="number" id="minAge" placeholder="Min age" min="1" max="120">
+                            <input type="number" id="maxAge" placeholder="Max age" min="1" max="120">
+                        </div>
+                        <button class="btn btn-outline" id="verifyRangeBtn" disabled>
+                            Verify Age Range
+                        </button>
+                    </div>
+
+                    <div class="feature-group">
+                        <h3>Age Comparison</h3>
+                        <input type="text" id="compareAddress" placeholder="Enter address to compare with">
+                        <button class="btn btn-outline" id="compareAgeBtn" disabled>
+                            Compare Ages
+                        </button>
+                    </div>
+                </div>
+
+                <div class="advanced-result" id="advancedResult"></div>
+            </section>
+
+            <!-- Statistics -->
+            <section class="card">
+                <h2 class="card-title">System Statistics</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-value" id="totalUsers">-</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="completedVerifications">-</div>
+                        <div class="stat-label">Completed Verifications</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-value" id="pendingVerifications">-</div>
+                        <div class="stat-label">Pending Verifications</div>
+                    </div>
+                </div>
+                <button class="btn btn-outline" id="refreshStatsBtn">Refresh Statistics</button>
+            </section>
+
+            <!-- Contract Not Found Warning -->
+            <section class="card" id="contractWarning" style="display: none;">
+                <h2 class="card-title">⚠️ Contract Not Deployed</h2>
+                <p class="card-description">
+                    The Private Age Verification contract is not deployed at the specified address on Sepolia testnet.
+                </p>
+                <div class="contract-info">
+                    <p><strong>Expected Address:</strong> <code id="expectedContractAddress">0x9A963da94E929E49c2a102fab47418Dc3b82Ee6C</code></p>
+                    <p><strong>Network:</strong> Sepolia Testnet (Chain ID: 11155111)</p>
+                </div>
+                <div class="deployment-steps">
+                    <h3>To deploy the contract:</h3>
+                    <ol>
+                        <li>Make sure you have Sepolia ETH for gas fees</li>
+                        <li>Use the deployment script to deploy the contract</li>
+                        <li>Update the contract address in the application</li>
+                        <li>Refresh this page</li>
+                    </ol>
+                </div>
+            </section>
+
+            <!-- User Status -->
+            <section class="card" id="userStatusCard" style="display: none;">
+                <h2 class="card-title">Your Verification Status</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        <span class="status-label">Age Submitted:</span>
+                        <span class="status-value" id="hasSubmittedAge">No</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Verification Completed:</span>
+                        <span class="status-value" id="verificationCompleted">No</span>
+                    </div>
+                    <div class="status-item">
+                        <span class="status-label">Submission Time:</span>
+                        <span class="status-value" id="submissionTime">-</span>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Transaction History -->
+        <section class="card">
+            <h2 class="card-title">Recent Transactions</h2>
+            <div class="transaction-list" id="transactionList">
+                <p class="no-transactions">No transactions yet</p>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2024 Private Age Verification. Built with Zama FHE Technology.</p>
+                <p class="footer-links">
+                    <a href="https://sepolia.etherscan.io/address/0x9A963da94E929E49c2a102fab47418Dc3b82Ee6C" target="_blank">
+                        View Contract
+                    </a>
+                    <span>•</span>
+                    <a href="https://docs.zama.ai/" target="_blank">
+                        Zama Documentation
+                    </a>
+                </p>
+            </div>
+        </footer>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+        <div class="loading-content">
+            <div class="loading-spinner large"></div>
+            <p id="loadingText">Processing transaction...</p>
+        </div>
+    </div>
+
+    <!-- Toast Notifications -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <script src="app.js"></script>
+</body>
+</html>
